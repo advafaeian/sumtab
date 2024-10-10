@@ -1,0 +1,16 @@
+*
+
+!.gitignore
+!.Rbuildignore
+
+!R/
+R/*
+!R/*.R
+
+!man/
+man/*
+!man/*.Rd
+
+!DESCRIPTION
+!NAMESPACE
+.Rproj.user
