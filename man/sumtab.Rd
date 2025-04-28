@@ -7,12 +7,13 @@
 sumtab(
   data,
   by = NA,
-  forced_nonparam = FALSE,
+  reporting_type = "auto",
   analysis = TRUE,
   complete_rows = TRUE,
   same_row = TRUE,
   multivariate = FALSE,
-  debug = FALSE
+  debug = FALSE,
+  risk_measure = "OR"
 )
 }
 \arguments{
@@ -20,7 +21,14 @@ sumtab(
 
 \item{by}{A variable to group the data by; if set to the default, \code{NA}, no analysis will be performed.}
 
-\item{forced_nonparam}{Logical. If \code{TRUE}, forces non-parametric analysis; otherwise, the choice between parametric and non-parametric methods is determined by conventional criteria. Default is \code{FALSE}.}
+\item{reporting_type}{A string indicating the type of test to perform. Options are:
+\describe{
+\item{"parametric"}{Forces the function to perform a parametric test (e.g., t-test) and report the mean ± SD.}
+\item{"non_parametric"}{Forces the function to perform a non-parametric test (e.g., Wilcoxon test) and report the median ± IQR.}
+\item{"auto"}{Automatically chooses the test based on the data's characteristics
+(e.g., a normality test to decide between parametric and non-parametric). If parametric, mean ± SD is reported;
+if non-parametric, median ± IQR is reported.}
+}}
 
 \item{analysis}{Logical. If \code{TRUE}, performs statistical analysis; if \code{FALSE}, generates descriptive statistics only. Default is \code{TRUE}.}
 
@@ -31,6 +39,12 @@ sumtab(
 \item{multivariate}{Logical. If \code{TRUE}, performs multivariate analysis. Default is \code{FALSE}.}
 
 \item{debug}{Logical. If \code{TRUE}, enables debug mode and disables simplification. Default is \code{FALSE}.}
+
+\item{risk_measure}{A string indicating the type of association measure to calculate.
+\describe{
+\item{"OR"}{Calculates the Odds Ratio (OR) and its 95\\% confidence interval based on a 2×2 table.}
+\item{"RR"}{Calculates the Relative Risk (RR) and its 95\\% confidence interval based on a 2×2 table.}
+}}
 }
 \value{
 A string matrix with the requested analysis and format.

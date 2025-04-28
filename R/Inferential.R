@@ -40,7 +40,7 @@ handle_numnum_inf <- function(response, feature, lmm, param){
   return(test)
 }
 
-handle_catecate_inf <- function(feature, response, tables){
+handle_catecate_inf <- function(feature, response, tables, risk_measure){
   param <- sum(tables < 5) == 0
 
   if (param){
@@ -53,8 +53,25 @@ handle_catecate_inf <- function(feature, response, tables){
     test <- fisher.test(feature, response)
   }
 
-  est <- tables[2,]/tables[1,] ## OR
-  test$est <- est[2]/est[1]
+  # table[,1] is total
+
+  if (risk_measure=="RR"){
+    risk1 <- tables[1,3] / sum(tables[1,c(2,3)])  # risk in non-exposure group
+    risk2 <- tables[2,3] / sum(tables[2,c(2,3)])  # risk in exposure group
+    test$est <- risk2 / risk1 # RR
+
+    log_rr <- log(test$est)
+
+    ## Standard Error of log(RR)
+    se_log_rr <- sqrt( (1/tables[2,3]) - (1/sum(tables[2,c(2,3)])) + (1/tables[1,3]) - (1/sum(tables[1,c(2,3)])) )
+
+    test$conf.int <- c(exp(log_rr - qnorm(0.975) * se_log_rr), exp(log_rr + qnorm(0.975) * se_log_rr))
+  }
+  if (risk_measure=="OR"){
+    est <- tables[2,]/tables[1,] ## OR
+    test$est <- est[3]/est[2]
+  }
+
 
   return(test)
 }
@@ -79,7 +96,7 @@ extract_multivariate <- function(name, model, isresnum){
   return(test)
 }
 
-handle_all_inf <- function(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model){
+handle_all_inf <- function(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model, risk_measure){
   test.temp <- list()
 
   if (multivariate){
@@ -91,7 +108,7 @@ handle_all_inf <- function(test, name, feature, response, isfeatnum, isresnum, n
   }else if(!isresnum & isfeatnum){
     test.temp <- handle_numcate_inf(feature, response, param, numresp)
   }else if(!isresnum & !isfeatnum){
-    test.temp <- handle_catecate_inf(feature, response, test$outer)
+    test.temp <- handle_catecate_inf(feature, response, test$outer, risk_measure)
   }
 
   test <- c(test.temp, test)

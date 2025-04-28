@@ -7,15 +7,21 @@
 #' @param reporting_type A string indicating the type of test to perform. Options are:
 #'   \describe{
 #'      \item{"parametric"}{Forces the function to perform a parametric test (e.g., t-test) and report the mean ± SD.}
-#'     \item{"non_parametric"}{Forces the function to perform a non-parametric test (e.g., Wilcoxon test) and report the median ± IQR.}
-#'     \item{"auto"}{Automatically chooses the test based on the data's characteristics
-#'     (e.g., a normality test to decide between parametric and non-parametric). If parametric, mean ± SD is reported;
-#'     if non-parametric, median ± IQR is reported.}
+#'      \item{"non_parametric"}{Forces the function to perform a non-parametric test (e.g., Wilcoxon test) and report the median ± IQR.}
+#'      \item{"auto"}{Automatically chooses the test based on the data's characteristics
+#'      (e.g., a normality test to decide between parametric and non-parametric). If parametric, mean ± SD is reported;
+#'      if non-parametric, median ± IQR is reported.}
+#'     }
 #' @param analysis Logical. If \code{TRUE}, performs statistical analysis; if \code{FALSE}, generates descriptive statistics only. Default is \code{TRUE}.
 #' @param complete_rows Logical. If \code{TRUE}, and if the feature is a factor with 2 levels, both levels will be shown in the table. Default is \code{TRUE}.
 #' @param same_row Logical. If \code{TRUE}, displays the feature name in the same row as its summary data. Default is \code{TRUE}.
 #' @param multivariate Logical. If \code{TRUE}, performs multivariate analysis. Default is \code{FALSE}.
 #' @param debug Logical. If \code{TRUE}, enables debug mode and disables simplification. Default is \code{FALSE}.
+#' @param risk_measure A string indicating the type of association measure to calculate.
+#'   \describe{
+#'     \item{"OR"}{Calculates the Odds Ratio (OR) and its 95\% confidence interval based on a 2×2 table.}
+#'     \item{"RR"}{Calculates the Relative Risk (RR) and its 95\% confidence interval based on a 2×2 table.}
+#'   }
 #'
 #' @return A string matrix with the requested analysis and format.
 #' @examples
@@ -25,10 +31,13 @@
 #'
 #' @export
 
-sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE){
+sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR"){
   # Check if the provided reporting_type is valid
   if (!reporting_type %in% c("parametric", "non_parametric", "auto")) {
     stop("Invalid reporting_type. Choose 'parametric', 'non_parametric', or 'auto'.")
+  }
+  if (!risk_measure %in% c("OR", "RR")) {
+    stop("Invalid risk_measure. Choose 'OR' or 'RR'.")
   }
 
   if (is.na(by)){
@@ -71,34 +80,34 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
         numresp <- 0
       }
       param <- is_numnum_param(feature, test$lmm, reporting_type)
-      test[c("outer", "inner")] <- handle_numnum_dis(feature, param)
+      test[c("outer", "inner")] <- handle_numnum_des(feature, param)
     }
 
     if(isresnum & !isfeatnum){
       cate <- as.factor(feature)
       param <- is_numcat_param(response, feature, reporting_type)
-      test <- handle_numcate_dis(response, feature, param)
+      test <- handle_numcate_des(response, feature, param)
       numfeat <- test$numcate
     }
 
     if(!isresnum & isfeatnum & !is.null(response)){
       cate <- as.factor(response)
       param <- is_numcat_param(feature, response, reporting_type)
-      test <- handle_numcate_dis(feature, response, param)
+      test <- handle_numcate_des(feature, response, param)
       numresp <- test$numcate
     }
 
     if(!isresnum & !isfeatnum){ ### handles by=NA
       response <- as.factor(response)
       feature <- as.factor(feature)
-      test <- handle_catecate_dis(feature, response)
+      test <- handle_catecate_des(feature, response)
       numfeat <- test$numfeat
       numresp <- test$numresp
     }
 
 
     if (analysis){
-      test <- handle_all_inf(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model)
+      test <- handle_all_inf(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model, risk_measure)
     }
 
     test <- test[names(test) %in% c("inner", "outer", "est", "ci", "p")] ### getting rid of default tests elements
@@ -190,3 +199,4 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
 
   return(sum)
 }
+

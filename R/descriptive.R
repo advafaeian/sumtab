@@ -1,4 +1,4 @@
-handle_numcate_dis <- function(nume, cate, param){
+handle_numcate_des <- function(nume, cate, param){
 
   test <- list()
   if (param){
@@ -31,7 +31,7 @@ handle_numcate_dis <- function(nume, cate, param){
   return(test)
 }
 
-handle_numnum_dis <- function(feature, param){
+handle_numnum_des <- function(feature, param){
   test <- list()
   if (param) {
     print("reporting mean±sd")
@@ -45,7 +45,7 @@ handle_numnum_dis <- function(feature, param){
   return(test)
 }
 
-handle_catecate_dis <- function(feature, response){
+handle_catecate_des <- function(feature, response){
   test <- list()
 
   total.feat <- table(feature)
