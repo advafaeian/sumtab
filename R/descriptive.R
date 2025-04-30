@@ -22,7 +22,7 @@ handle_numcate_des <- function(nume, cate, param){
     test$outer <- total.median
     test$inner <- total.iqr
 
-    medians.by.cate <- tapply(nume, cate, mean, na.rm=T)
+    medians.by.cate <- tapply(nume, cate, median, na.rm=T)
     iqrs.by.cate <- tapply(nume, cate, IQR, na.rm=T)
     test$numcate <- length(medians.by.cate)
     test$outer <- c(total=total.median, medians.by.cate)
