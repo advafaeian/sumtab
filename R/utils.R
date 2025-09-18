@@ -17,7 +17,7 @@ handle_ps <- function(ps, round.n=3){
     }, ps.next, p.2)
 
   ps.next  <- ifelse(ps.next =="1.000", "<1", ps.next)
-  return(ps.next)
+  return(unname(ps.next))
 }
 
 
