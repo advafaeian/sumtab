@@ -197,6 +197,8 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
     sum <- do.call(rbind, sum) #simplifying list
   }
 
+  rownames(sum) <- NULL
+
   return(sum)
 }
 
