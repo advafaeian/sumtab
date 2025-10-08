@@ -1,5 +1,6 @@
 handle_numcate_inf <- function(nume, cate, param, numcate){
 
+  test = list()
   if (param){
     if (numcate>2) {
       print("ANOVA")
