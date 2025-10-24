@@ -24,7 +24,7 @@ handle_ps <- function(ps, round.n=3){
 is_numcat_param <- function(nume, cate, reporting_type="auto"){
   if (reporting_type == "non_parametric") return(FALSE)
   if (reporting_type == "parametric") return(TRUE)
-  return(!(shapiro.test(resid(lm(nume ~ cate)))$p.value < 0.05) & !sum(colSums(table(nume, cate)) < 2))
+  return(!(shapiro.test(resid(lm(nume ~ cate)))$p.value < 0.05) & !sum(colSums(table(nume, cate)) < 3))
 }
 is_numnum_param <- function(feature, lmm=NULL, reporting_type="auto"){
   if (reporting_type == "non_parametric") return(FALSE)
