@@ -140,6 +140,8 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
       test$ci <- "-"
     }
 
+    test$ci <- ifelse(test$ci == "NA, NA", "-", test$ci) # in the case of kandall
+
     ### removing redundant row and adding levels or ""
     if(!complete_rows & numfeat==2) {
       test$inout <- test$inout[2,, drop = F]

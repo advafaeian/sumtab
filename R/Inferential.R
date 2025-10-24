@@ -28,15 +28,18 @@ handle_numcate_inf <- function(nume, cate, param, numcate){
 
 handle_numnum_inf <- function(response, feature, lmm, param){
   test <- list()
-  test$est <-  coef(lmm)[2]
-  test$conf.int <- confint(lmm)[2,]
+
   if (param){
     print("pearson regression")
     test$p.value <- cor.test(response, feature)$p.value
+    test$est <-  coef(lmm)[2]
+    test$conf.int <- confint(lmm)[2,]
   }
   if (!param){
     print("kendall regression")
-    test$p.value <- cor.test(response, feature, method="kendall")$p.value
+    tt <- cor.test(response, feature, method="kendall")
+    test$p.value <- tt$p.value
+    test$est <-  tt$estimate
   }
   return(test)
 }
