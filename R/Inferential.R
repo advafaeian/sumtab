@@ -82,11 +82,10 @@ handle_catecate_inf <- function(feature, response, tables, risk_measure){
 
 doing_multivariate <- function(isresnum, data, by){
   if (isresnum) {
-    family <- "gaussian"
+    model <- lm(as.formula(paste(by,"~.")), data=data)
   } else {
-    family <- "binomial"
+    model <- glm(as.formula(paste(by,"~.")), family="binomial", data=data)
   }
-  model <- glm(as.formula(paste(by,"~.")), family=family, data=data)
   print(summary(model))
   return(model)
 }
