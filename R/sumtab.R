@@ -40,6 +40,12 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
     stop("Invalid risk_measure. Choose 'OR' or 'RR'.")
   }
 
+  if (reporting_type == "non_parametric" && multivariate) {
+    stop("Only parametric tests are available for multivariate analysis.")
+  }
+
+  if (multivariate) reporting_type <- "parametric"
+
   if (is.na(by)){
     response <- NULL
   } else {
