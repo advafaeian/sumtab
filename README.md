@@ -1,6 +1,6 @@
 # sumtab
 
-**A minimalistic, fast, pipe-friendly, and opinionated statistical summary table generator.**
+**A minimalistic, fast, pipe-friendly, robust, and opinionated statistical summary table generator.**
 
 ## Overview
 

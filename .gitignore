@@ -12,6 +12,13 @@ R/*
 man/*
 !man/*.Rd
 
+!tests/
+tests/*
+!tests/*.R
+
+!tests/testthat/
+!tests/testthat/*.R
+
 !DESCRIPTION
 !NAMESPACE
 .Rproj.user
