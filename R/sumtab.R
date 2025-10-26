@@ -11,17 +11,23 @@
 #'      \item{"auto"}{Automatically chooses the test based on the data's characteristics
 #'      (e.g., a normality test to decide between parametric and non-parametric). If parametric, mean ± SD is reported;
 #'      if non-parametric, median ± IQR is reported.}
-#'     }
+#'}
 #' @param analysis Logical. If \code{TRUE}, performs statistical analysis; if \code{FALSE}, generates descriptive statistics only. Default is \code{TRUE}.
 #' @param complete_rows Logical. If \code{TRUE}, and if the feature is a factor with 2 levels, both levels will be shown in the table. Default is \code{TRUE}.
 #' @param same_row Logical. If \code{TRUE}, displays the feature name in the same row as its summary data. Default is \code{TRUE}.
 #' @param multivariate Logical. If \code{TRUE}, performs multivariate analysis. Default is \code{FALSE}.
 #' @param debug Logical. If \code{TRUE}, enables debug mode and disables simplification. Default is \code{FALSE}.
-#' @param risk_measure A string indicating the type of association measure to calculate.
-#'   \describe{
-#'     \item{"OR"}{Calculates the Odds Ratio (OR) and its 95\% confidence interval based on a 2×2 table.}
-#'     \item{"RR"}{Calculates the Relative Risk (RR) and its 95\% confidence interval based on a 2×2 table.}
-#'   }
+#' @param risk_measure A string indicating the type of association measure to calculate. Options are:
+#'  \describe{
+#'     \item{\code{"OR"}}{Calculates the Odds Ratio (OR) and its 95-percent confidence interval based on a 2x2 table.}
+#'     \item{\code{"RR"}}{Calculates the Relative Risk (RR) and its 95-percent confidence interval based on a 2x2 table.}
+#'}
+#'
+#' @param p_format_default A function applied to to each raw numeric p-value before
+#'   any user-specified post-processing. The default is the internal formatter \code{handle_ps()}.
+#' @param p_format_after Optional function applied to each already-formatted
+#'   p-value. Must take a single character p-value and return a single character
+#'   value. If \code{NULL}, no post-formatting is performed.
 #'
 #' @return A string matrix with the requested analysis and format.
 #' @examples
@@ -31,7 +37,7 @@
 #'
 #' @export
 
-sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR"){
+sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR", p_format_default = handle_ps, p_format_after = NULL){
   # Check if the provided reporting_type is valid
   if (!reporting_type %in% c("parametric", "non_parametric", "auto")) {
     stop("Invalid reporting_type. Choose 'parametric', 'non_parametric', or 'auto'.")
@@ -114,6 +120,13 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
 
     if (analysis){
       test <- handle_all_inf(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model, risk_measure)
+
+      test$p <- p_format_default(test$p) # handled here (not in handle_all_inf), so it's safe to apply format_p now
+
+      if (!is.null(p_format_after)){
+        test$p <- p_format_after(test$p)
+      }
+
     }
 
     test <- test[names(test) %in% c("inner", "outer", "est", "ci", "p")] ### getting rid of default tests elements

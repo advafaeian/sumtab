@@ -13,7 +13,9 @@ sumtab(
   same_row = TRUE,
   multivariate = FALSE,
   debug = FALSE,
-  risk_measure = "OR"
+  risk_measure = "OR",
+  p_format_default = handle_ps,
+  p_format_after = NULL
 )
 }
 \arguments{
@@ -40,11 +42,18 @@ if non-parametric, median ± IQR is reported.}
 
 \item{debug}{Logical. If \code{TRUE}, enables debug mode and disables simplification. Default is \code{FALSE}.}
 
-\item{risk_measure}{A string indicating the type of association measure to calculate.
+\item{risk_measure}{A string indicating the type of association measure to calculate. Options are:
 \describe{
-\item{"OR"}{Calculates the Odds Ratio (OR) and its 95\\% confidence interval based on a 2×2 table.}
-\item{"RR"}{Calculates the Relative Risk (RR) and its 95\\% confidence interval based on a 2×2 table.}
+\item{\code{"OR"}}{Calculates the Odds Ratio (OR) and its 95-percent confidence interval based on a 2x2 table.}
+\item{\code{"RR"}}{Calculates the Relative Risk (RR) and its 95-percent confidence interval based on a 2x2 table.}
 }}
+
+\item{p_format_default}{A function applied to the vector of p-values prior to
+any user-specified post-processing. The default is the internal formatter \code{handle_ps()}.}
+
+\item{p_format_after}{An optional function applied to the vector of p-values
+subsequent to the default formatting step. If \code{NULL}, no post-formatting
+is performed.}
 }
 \value{
 A string matrix with the requested analysis and format.

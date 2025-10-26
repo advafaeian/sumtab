@@ -117,7 +117,6 @@ handle_all_inf <- function(test, name, feature, response, isfeatnum, isresnum, n
   test <- c(test.temp, test)
   test$ci <- test$conf.int
   test$p <- test$p.value
-  test$p <- handle_ps(test$p)
   test <- test[c("inner", "outer", "est", "ci", "p")] ### getting rid of default tests elements
   return(test)
 }
