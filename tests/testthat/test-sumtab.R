@@ -160,7 +160,12 @@ test_that("sumtab(by discrete, debug=T) runs without error and returns a list", 
 })
 
 
-
+test_that("sumtab(format_cd with wrong signature errors", {
+  expect_error(
+    mock_data %>% sumtab(format_cd = function(x) x),
+    regexp = "format_cd"
+  )
+})
 
 
 

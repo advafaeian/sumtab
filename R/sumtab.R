@@ -23,11 +23,16 @@
 #'     \item{\code{"RR"}}{Calculates the Relative Risk (RR) and its 95-percent confidence interval based on a 2x2 table.}
 #'}
 #'
-#' @param p_format_default A function applied to to each raw numeric p-value before
+#' @param fmt_p_default A function applied to to each raw numeric p-value before
 #'   any user-specified post-processing. The default is the internal formatter \code{handle_ps()}.
-#' @param p_format_after Optional function applied to each already-formatted
+#' @param fmt_p_after Optional function applied to each already-formatted
 #'   p-value. Must take a single character p-value and return a single character
 #'   value. If \code{NULL}, no post-formatting is performed.
+#' @param fmt_cd A function used to format a pair of summary
+#'   statistics representing central tendency and dispersion (e.g. mean–SD or
+#'   median–IQR). The function must accept exactly two arguments
+#'   \code{(central, dispersion)},where each argument is already rounded
+#'   and formatted as a string, and return a single character scalar. The default is the internal formatter.
 #'
 #' @return A string matrix with the requested analysis and format.
 #' @examples
@@ -37,7 +42,7 @@
 #'
 #' @export
 
-sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR", p_format_default = handle_ps, p_format_after = NULL){
+sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR", fmt_p_default = handle_ps, fmt_p_after = NULL, fmt_cd=default_fmt_cd){
   # Check if the provided reporting_type is valid
   if (!reporting_type %in% c("parametric", "non_parametric", "auto")) {
     stop("Invalid reporting_type. Choose 'parametric', 'non_parametric', or 'auto'.")
@@ -48,6 +53,11 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
 
   if (reporting_type == "non_parametric" && multivariate) {
     stop("Only parametric tests are available for multivariate analysis.")
+  }
+
+  try_res <- try(fmt_cd("X", "Y"), silent = TRUE)
+  if (inherits(try_res, "try-error")) {
+    stop("Calling `fmt_cd(\"X\", \"Y\")` failed — check your function body.")
   }
 
   if (multivariate) reporting_type <- "parametric"
@@ -121,10 +131,10 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
     if (analysis){
       test <- handle_all_inf(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model, risk_measure)
 
-      test$p <- p_format_default(test$p) # handled here (not in handle_all_inf), so it's safe to apply format_p now
+      test$p <- fmt_p_default(test$p) # handled here (not in handle_all_inf), so it's safe to apply format_p now
 
-      if (!is.null(p_format_after)){
-        test$p <- p_format_after(test$p)
+      if (!is.null(fmt_p_after)){
+        test$p <- fmt_p_after(test$p)
       }
 
     }
@@ -138,7 +148,7 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
       test$inner <- ifelse(test$inner=="100.00", "100", test$inner)
       test$inout <- paste0(test$outer, " (", test$inner, "%)")
     }else{
-      test$inout <- paste0(test$outer, "±", test$inner)
+      test$inout <- fmt_cd(test$outer, test$inner)
     }
 
     if (isresnum) test$inout <- test$inout[-1]

@@ -14,8 +14,9 @@ sumtab(
   multivariate = FALSE,
   debug = FALSE,
   risk_measure = "OR",
-  p_format_default = handle_ps,
-  p_format_after = NULL
+  fmt_p_default = handle_ps,
+  fmt_p_after = NULL,
+  fmt_cd = default_fmt_cd
 )
 }
 \arguments{
@@ -48,12 +49,18 @@ if non-parametric, median ± IQR is reported.}
 \item{\code{"RR"}}{Calculates the Relative Risk (RR) and its 95-percent confidence interval based on a 2x2 table.}
 }}
 
-\item{p_format_default}{A function applied to the vector of p-values prior to
+\item{fmt_p_default}{A function applied to to each raw numeric p-value before
 any user-specified post-processing. The default is the internal formatter \code{handle_ps()}.}
 
-\item{p_format_after}{An optional function applied to the vector of p-values
-subsequent to the default formatting step. If \code{NULL}, no post-formatting
-is performed.}
+\item{fmt_p_after}{Optional function applied to each already-formatted
+p-value. Must take a single character p-value and return a single character
+value. If \code{NULL}, no post-formatting is performed.}
+
+\item{fmt_cd}{A function used to format a pair of summary
+statistics representing central tendency and dispersion (e.g. mean–SD or
+median–IQR). The function must accept exactly two arguments
+\code{(central, dispersion)},where each argument is already rounded
+and formatted as a string, and return a single character scalar. The default is the internal formatter.}
 }
 \value{
 A string matrix with the requested analysis and format.

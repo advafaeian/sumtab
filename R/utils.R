@@ -20,6 +20,9 @@ handle_ps <- function(ps, round.n=3){
   return(unname(ps.next))
 }
 
+default_fmt_cd <- function(outer, inner) {
+  paste0(outer, "±", inner)
+}
 
 is_numcat_param <- function(nume, cate, reporting_type="auto"){
   if (reporting_type == "non_parametric") return(FALSE)
