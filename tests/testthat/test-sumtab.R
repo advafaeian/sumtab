@@ -159,6 +159,16 @@ test_that("sumtab(by discrete, debug=T) runs without error and returns a list", 
 
 })
 
+test_that("sumtab(by discrete, same_row=F) runs without error and returns a matrix", {
+  captured_output <- capture.output({
+    result <- mock_data %>% sumtab(by = "group", same_row=F)
+  })
+
+  expect_true(exists("result"))
+
+  expect_true(is.matrix(result))
+
+})
 
 test_that("sumtab(format_cd with wrong signature errors", {
   expect_error(
