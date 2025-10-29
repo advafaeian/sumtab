@@ -4,9 +4,11 @@ handle_numcate_inf <- function(nume, cate, param, numcate){
   if (param){
     if (numcate>2) {
       print("ANOVA")
+      test$name <- "anova"
       test$p.value <- unlist(summary(aov(nume ~ cate)))["Pr(>F)1"]
     }else{
       print("t test")
+      test$name <- "t"
       test <- t.test(nume ~ cate)
       test$est <- test$estimate[2] - test$estimate[1]
     }
@@ -15,15 +17,17 @@ handle_numcate_inf <- function(nume, cate, param, numcate){
   if (!param){
     if (numcate>2) {
       print("Kruskal-Wallis")
+      test$name <- "kw"
       test <- kruskal.test(nume ~ cate)
     } else {
       print("wilcox test")
+      test$name <- "wilcox"
       test <- wilcox.test(nume ~ cate, conf.int = T)
       test$est <- test$estimate
     }
   }
 
-  return(test[c("est", "conf.int", "p.value")])
+  return(test[c("name", "est", "conf.int", "p.value")])
 }
 
 handle_numnum_inf <- function(response, feature, lmm, param){
@@ -31,15 +35,18 @@ handle_numnum_inf <- function(response, feature, lmm, param){
 
   if (param){
     print("pearson regression")
+    test$name <- "pearson"
     test$p.value <- cor.test(response, feature)$p.value
     test$est <-  coef(lmm)[2]
     test$conf.int <- confint(lmm)[2,]
   }
   if (!param){
     print("kendall regression")
+    test$name <- "kendall"
     tt <- cor.test(response, feature, method="kendall")
     test$p.value <- tt$p.value
     test$est <-  tt$estimate
+    test$conf.int <- NA
   }
   return(test)
 }
@@ -47,13 +54,17 @@ handle_numnum_inf <- function(response, feature, lmm, param){
 handle_catecate_inf <- function(feature, response, tables, risk_measure){
   param <- sum(tables < 5) == 0
 
+  test <- list()
+
   if (param){
     print("chisq test")
+    test$name <- "chisq"
     test <- chisq.test(feature, response)
     test$conf.int <- fisher.test(feature, response)$conf.int
   }
   if (!param){
     print("fisher test")
+    test$name <- "fisher"
     test <- fisher.test(feature, response)
   }
 
@@ -96,6 +107,7 @@ extract_multivariate <- function(name, model, isresnum){
   test$est <- coef(model)[index]
   test$conf.int <- confint(model)[index,]
   test$p.value <- coef(summary(model))[index,ifelse(isresnum, 'Pr(>|t|)', 'Pr(>|z|)')]
+  test$name <- ifelse(grep("glm", model$call), "binomial", "pearson")
   return(test)
 }
 
@@ -117,6 +129,6 @@ handle_all_inf <- function(test, name, feature, response, isfeatnum, isresnum, n
   test <- c(test.temp, test)
   test$ci <- test$conf.int
   test$p <- test$p.value
-  test <- test[c("inner", "outer", "est", "ci", "p")] ### getting rid of default tests elements
+  test <- test[c("inner", "outer", "est", "ci", "p", "name")] ### getting rid of default tests elements
   return(test)
 }

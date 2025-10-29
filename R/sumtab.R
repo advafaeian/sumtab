@@ -23,8 +23,29 @@
 #'     \item{\code{"RR"}}{Calculates the Relative Risk (RR) and its 95-percent confidence interval based on a 2x2 table.}
 #'}
 #'
-#' @param fmt_p_default A function applied to to each raw numeric p-value before
-#'   any user-specified post-processing. The default is the internal formatter \code{handle_ps()}.
+#' @param fmt_num A function applied to each numeric statistic (other than p-values)
+#'   before returning the summary table. The function must accept exactly two
+#'   arguments \code{(x, context)}, where \code{x} is the raw numeric value and
+#'   \code{context} is a named list containing:
+#'   \itemize{
+#'     \item{\code{param_name}}{(`character`) name of the statistic being
+#'           formatted (e.g. `"p"`, or a label describing whether this value is
+#'           an "outer" statistic such as mean or n, or an "inner" statistic such
+#'           as sd or percent).}
+#'     \item{\code{test_name}}{(`character`) name of the statistical test from
+#'           which the statistic originates.}
+#'     \item{\code{isfeatnum}}{(`logical`) whether the feature is numeric.}
+#'     \item{\code{isresnum}}{(`logical`) whether the result is numeric.}
+#'   }
+#'   The function must return a single formatted character scalar. The default is
+#'   the internal formatter \code{fmt_num_default()}.
+#'
+#' @param fmt_p_default A function applied to each raw numeric p-value before any
+#'   user-specified post-processing via \code{fmt_p_after}. The function must
+#'   accept at least one argument: a numeric vector of p-values, and may also
+#'   accept \code{fmt_num} as an injected argument to control numeric rounding of
+#'   p-values before decoration. The default is the internal formatter
+#'   \code{handle_ps()}.
 #' @param fmt_p_after Optional function applied to each already-formatted
 #'   p-value. Must take a single character p-value and return a single character
 #'   value. If \code{NULL}, no post-formatting is performed.
@@ -39,10 +60,11 @@
 #' # Basic usage:
 #' sumtab(data = my_data)
 #' my_data %>% sumtab()
+#' my_data %>% sumtab(by="group")
 #'
 #' @export
 
-sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR", fmt_p_default = handle_ps, fmt_p_after = NULL, fmt_cd=default_fmt_cd){
+sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complete_rows=TRUE, same_row=TRUE, multivariate=FALSE, debug=FALSE, risk_measure="OR", fmt_num = fmt_num_default, fmt_p_default = handle_ps, fmt_p_after = NULL, fmt_cd=default_fmt_cd){
   # Check if the provided reporting_type is valid
   if (!reporting_type %in% c("parametric", "non_parametric", "auto")) {
     stop("Invalid reporting_type. Choose 'parametric', 'non_parametric', or 'auto'.")
@@ -58,6 +80,12 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
   try_res <- try(fmt_cd("X", "Y"), silent = TRUE)
   if (inherits(try_res, "try-error")) {
     stop("Calling `fmt_cd(\"X\", \"Y\")` failed — check your function body.")
+  }
+
+  if (!is.null(fmt_num)) {
+    if (length(formals(fmt_num)) != 2) {
+      stop("`fmt_num` must accept exactly two arguments: (value, context).")
+    }
   }
 
   if (multivariate) reporting_type <- "parametric"
@@ -131,7 +159,8 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
     if (analysis){
       test <- handle_all_inf(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model, risk_measure)
 
-      test$p <- fmt_p_default(test$p) # handled here (not in handle_all_inf), so it's safe to apply format_p now
+      safe_fmt_p_default <- wrap_fmt_p(fmt_p_default)
+      test$p <- safe_fmt_p_default(test$p, fmt_num = fmt_num) # handled here (not in handle_all_inf), so it's safe to apply format_p now
 
       if (!is.null(fmt_p_after)){
         test$p <- fmt_p_after(test$p)
@@ -140,7 +169,18 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
     }
 
     test <- test[names(test) %in% c("inner", "outer", "est", "ci", "p")] ### getting rid of default tests elements
-    test[names(test) != "p"] <- lapply(test[names(test) != "p"], rof, 2)
+
+    idx <- !(names(test) %in% c("p", "name"))
+    test[idx] <- Map(function(x, nm)
+      fmt_num(x, list(param_name = nm,
+                      test_name = test$name,
+                      isfeatnum = isfeatnum,
+                      isresnum = isresnum)),
+      test[idx],
+      names(test)[idx]
+    )
+
+    test$name <- NULL # no longer needed
 
     ### unifying inner outer
     if (!isresnum & !isfeatnum){

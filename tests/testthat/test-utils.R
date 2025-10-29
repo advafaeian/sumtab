@@ -1,18 +1,18 @@
 library(testthat)
 set.seed(49)
 
-test_that("rof rounds and formats correctly", {
-  expect_equal(rof(3.14159), "3.14")
-  expect_equal(rof(3.14159, 3), "3.142")
-  expect_equal(rof(2), "2.00")
-  expect_type(rof(2.5), "character") # always returns character
+test_that("fmt_num_default rounds and formats correctly", {
+  expect_equal(fmt_num_default(3.14159, list(param_name = "est")), "3.14")
+  expect_equal(fmt_num_default(3.14159, list(param_name = "p")), "3.142")
+  expect_equal(fmt_num_default(2, list(param_name = "est")), "2.00")
+  expect_type(fmt_num_default(2.5, list(param_name = "est")), "character") # always returns character
 })
 
 test_that("handle_ps formats p-values correctly", {
   expect_equal(handle_ps(0.00001), "<0.0001****")
   expect_equal(handle_ps(0.0005), "<0.001***")
   expect_equal(handle_ps(0.009), "0.009**")
-  expect_equal(handle_ps(0.04, round.n=2), "0.04*")
+  expect_equal(handle_ps(0.041), "0.041*")
   expect_equal(handle_ps(0.534), "0.534")
   expect_equal(handle_ps(1), "<1")
   expect_equal(handle_ps(0.99999), "<1")
