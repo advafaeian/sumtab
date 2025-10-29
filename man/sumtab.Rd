@@ -94,6 +94,17 @@ This function generates summary table given various customizable options.
 # Basic usage:
 sumtab(data = my_data)
 my_data \%>\% sumtab()
-my_data \%>\% sumtab(by="group")
+my_data \%>\% sumtab(by = "group")
 
+# Example of a custom numeric formatter:
+# This formatter prints p-values with 3 decimals and all other numbers with 2.
+fmt_num <- function(x, context) {
+  if (context$param_name == "p") {
+    n <- 3
+  } else {
+    n <- 2
+  }
+  format(round(x, n), nsmall = n, trim = TRUE)
+}
+my_data \%>\% sumtab(fmt_num = fmt_num)
 }
