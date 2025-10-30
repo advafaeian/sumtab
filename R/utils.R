@@ -38,6 +38,7 @@ is_numcat_param <- function(nume, cate, reporting_type="auto"){
 is_numnum_param <- function(feature, lmm=NULL, reporting_type="auto"){
   if (reporting_type == "non_parametric") return(FALSE)
   if (reporting_type == "parametric") return(TRUE)
+  if (length(na.omit(feature)) < 3 || length(unique(feature)) < 2) return(FALSE)
   if (is.null(lmm)) return(!shapiro.test(feature)$p.value < 0.05)
   return(!shapiro.test(rstandard(lmm))$p.value < 0.05)
 }
