@@ -21,7 +21,7 @@ handle_ps <- function(ps, fmt_num = fmt_num_default){
         paste0(c(x,rep("*",y)), collapse="")))
     }, ps.next, p.2)
 
-  ps.next  <- ifelse(ps.next =="1.000", "<1", ps.next)
+  ps.next  <- ifelse(grepl("^1\\.0+$", ps.next), "<1", ps.next)
   return(unname(ps.next))
 }
 

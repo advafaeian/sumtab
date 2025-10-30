@@ -178,4 +178,14 @@ test_that("sumtab(format_cd with wrong signature errors", {
 })
 
 
+test_that("sumtab(by discrete, fmt_p_default=func(x)) runs without error and returns a matrix", {
+  captured_output <- capture.output({
+    result <- mock_data %>% sumtab(by = "group", fmt_p_default= function(x) { return(x) })
+  })
+
+  expect_true(exists("result"))
+
+  expect_true(is.matrix(result))
+
+})
 
