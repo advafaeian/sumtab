@@ -25,20 +25,6 @@ handle_ps <- function(ps, fmt_num = fmt_num_default){
   return(unname(ps.next))
 }
 
-# Adapt a user-provided fmt_p_default(x) into a (x, fmt_num) function.
-wrap_fmt_p <- function(fmt_p) {
-
-  if (is.null(fmt_p)) return(fmt_p_default)
-
-  f_args <- names(formals(fmt_p))
-
-  if ("fmt_num" %in% f_args) {
-    return(function(p, fmt_num) fmt_p(p, fmt_num = fmt_num))
-  }
-
-  return(function(p, fmt_num) fmt_p(p))
-}
-
 
 default_fmt_cd <- function(outer, inner) {
   paste0(outer, "±", inner)

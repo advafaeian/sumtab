@@ -170,8 +170,11 @@ sumtab <-  function(data, by=NA, reporting_type = "auto", analysis=TRUE, complet
     if (analysis){
       test <- handle_all_inf(test, name, feature, response, isfeatnum, isresnum, numfeat, numresp, param, multivariate, model, risk_measure)
 
-      safe_fmt_p_default <- wrap_fmt_p(fmt_p_default)
-      test$p <- safe_fmt_p_default(test$p, fmt_num = fmt_num) # handled here (not in handle_all_inf), so it's safe to apply format_p now
+      if ("fmt_num" %in%  names(formals(fmt_p_default))) {
+        test$p <- fmt_p_default(test$p, fmt_num = fmt_num) # handled here (not in handle_all_inf), so it's safe to apply format_p now
+      } else {
+        test$p <- fmt_p_default(test$p)
+      }
 
       if (!is.null(fmt_p_after)){
         test$p <- fmt_p_after(test$p)
