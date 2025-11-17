@@ -1,5 +1,4 @@
-#devtools::test_active_file("./tests/testthat/test-sumtab.R")
-#devtools::load_all()
+library(dplyr)
 
 TOLERANCE = .01
 
