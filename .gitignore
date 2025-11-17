@@ -4,6 +4,10 @@
 !.Rbuildignore
 !README.md
 
+!.github/
+!.github/workflows/
+!.github/workflows/*.yaml
+
 !R/
 R/*
 !R/*.R
